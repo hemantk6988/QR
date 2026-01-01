@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everything Will Be Alright</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fdf6f0;
+  font-family: "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+.container {
+  position: relative;
+  text-align: center;
+}
+
+.envelope {
+  width: 260px;
+  height: 160px;
+  background: #e6b98e;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-left: 130px solid transparent;
+  border-right: 130px solid transparent;
+  border-top: 80px solid #d29a6a;
+  transform-origin: top;
+  animation: openFlap 2s forwards;
+}
+
+.flowers {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: rise 3s forwards;
+}
+
+.flower {
+  width: 22px;
+  height: 22px;
+  background: pink;
+  border-radius: 50%;
+  margin: 6px auto;
+  box-shadow:
+    -12px 0 pink,
+    12px 0 pink,
+    0 -12px pink;
+}
+
+.message {
+  margin-top: 30px;
+  font-size: 22px;
+  color: #444;
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+  animation-delay: 2.5s;
+}
+
+@keyframes openFlap {
+  to { transform: rotateX(180deg); }
+}
+
+@keyframes rise {
+  from { transform: translate(-50%, 40px); }
+  to { transform: translate(-50%, -90px); }
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="envelope">
+      <div class="flap"></div>
+      <div class="flowers">
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+      </div>
+    </div>
+    <div class="message">Everything will be alright 🌸</div>
+  </div>
+</body>
+</html>
