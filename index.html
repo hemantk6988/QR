@@ -1,104 +1,308 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Everything Will Be Alright</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click to Open</title>
+    <style>
+        /* --- General Setup --- */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffe0e9;
+            font-family: 'Brush Script MT', cursive;
+            overflow: hidden;
+            transition: background-color 3s ease;
+        }
 
-<style>
-body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #fdf6f0;
-  font-family: "Segoe UI", sans-serif;
-  overflow: hidden;
-}
+        /* The background changing effect */
+        body.grown {
+            background-color: #e8f5e9; /* Light green garden background */
+            background-image: radial-gradient(#c8e6c9 20%, transparent 20%),
+                              radial-gradient(#c8e6c9 20%, transparent 20%);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+        }
 
-.container {
-  position: relative;
-  text-align: center;
-}
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.envelope {
-  width: 260px;
-  height: 160px;
-  background: #e6b98e;
-  position: relative;
-  border-radius: 6px;
-  overflow: hidden;
-}
+        /* --- The SVG Vines (Background) --- */
+        .vines-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1; /* Behind the envelope */
+        }
 
-.flap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-left: 130px solid transparent;
-  border-right: 130px solid transparent;
-  border-top: 80px solid #d29a6a;
-  transform-origin: top;
-  animation: openFlap 2s forwards;
-}
+        .vine-path {
+            fill: none;
+            stroke: #4caf50;
+            stroke-width: 3;
+            stroke-linecap: round;
+            /* This creates the 'drawing' effect */
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000; 
+            transition: stroke-dashoffset 4s ease-out;
+        }
 
-.flowers {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  animation: rise 3s forwards;
-}
+        .container.active .vine-path {
+            stroke-dashoffset: 0; /* Triggers the drawing */
+        }
 
-.flower {
-  width: 22px;
-  height: 22px;
-  background: pink;
-  border-radius: 50%;
-  margin: 6px auto;
-  box-shadow:
-    -12px 0 pink,
-    12px 0 pink,
-    0 -12px pink;
-}
+        /* --- The Envelope --- */
+        .envelope-wrapper {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.5s ease;
+        }
 
-.message {
-  margin-top: 30px;
-  font-size: 22px;
-  color: #444;
-  opacity: 0;
-  animation: fadeIn 2s forwards;
-  animation-delay: 2.5s;
-}
+        .container.active .envelope-wrapper {
+            transform: translateY(100px); /* Move down to make room for flowers */
+            cursor: default;
+        }
 
-@keyframes openFlap {
-  to { transform: rotateX(180deg); }
-}
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #b71c1c;
+            border-radius: 0 0 10px 10px;
+        }
 
-@keyframes rise {
-  from { transform: translate(-50%, 40px); }
-  to { transform: translate(-50%, -90px); }
-}
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 110px solid #c62828;
+            transform-origin: top;
+            transition: transform 0.6s ease-in-out, z-index 0.2s;
+            z-index: 5;
+        }
 
-@keyframes fadeIn {
-  to { opacity: 1; }
-}
-</style>
+        .container.active .flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-bottom: 120px solid #d32f2f;
+            z-index: 4;
+            border-radius: 0 0 10px 10px;
+        }
+
+        /* --- The Explosion of Flowers --- */
+        .flower-cluster {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            z-index: 2; /* Inside envelope */
+        }
+
+        .gen-flower {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #fff 30%, var(--color) 30%);
+            border-radius: 50%;
+            transform: scale(0);
+            box-shadow: 
+                0 -5px 0 var(--color), 
+                5px 0 0 var(--color), 
+                0 5px 0 var(--color), 
+                -5px 0 0 var(--color);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        bottom 1s ease-out, 
+                        left 1s ease-out;
+            opacity: 0;
+        }
+
+        /* Stem for generated flowers */
+        .gen-flower::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 2px;
+            height: 0;
+            background: #2e7d32;
+            transform: translateX(-50%);
+            transition: height 0.5s;
+            z-index: -1;
+        }
+
+        .container.active .gen-flower {
+            opacity: 1;
+            /* Transform and positions are handled by JS injection */
+        }
+        
+        .container.active .gen-flower::after {
+            height: 40px; /* Small stems appear */
+        }
+
+        /* --- The Message --- */
+        .message-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 20;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition-delay: 2s; /* Wait for vines and flowers */
+        }
+
+        .container.active .message-card {
+            transform: translate(-50%, -200px) scale(1);
+        }
+
+        h1 {
+            color: #d81b60;
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        p {
+            color: #555;
+            font-size: 1.2rem;
+            font-family: sans-serif;
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: -50px;
+            width: 100%;
+            text-align: center;
+            color: #b71c1c;
+            font-family: sans-serif;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+    </style>
 </head>
-
 <body>
-  <div class="container">
-    <div class="envelope">
-      <div class="flap"></div>
-      <div class="flowers">
-        <div class="flower"></div>
-        <div class="flower"></div>
-        <div class="flower"></div>
-      </div>
+
+    <div class="container" id="mainContainer">
+        
+        <svg class="vines-svg" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
+            <path class="vine-path" d="M 400 400 Q 300 350 200 500 T 50 300" />
+            <path class="vine-path" d="M 400 400 Q 350 300 100 200" style="transition-delay: 0.2s" />
+            <path class="vine-path" d="M 400 400 Q 380 200 200 50" style="transition-delay: 0.4s" />
+            
+            <path class="vine-path" d="M 400 400 Q 500 350 600 500 T 750 300" style="transition-delay: 0.1s" />
+            <path class="vine-path" d="M 400 400 Q 450 300 700 200" style="transition-delay: 0.3s" />
+            <path class="vine-path" d="M 400 400 Q 420 200 600 50" style="transition-delay: 0.5s" />
+
+            <path class="vine-path" d="M 400 400 Q 300 500 100 550" style="transition-delay: 0.6s" />
+            <path class="vine-path" d="M 400 400 Q 500 500 700 550" style="transition-delay: 0.7s" />
+        </svg>
+
+        <div class="message-card">
+            <h1>Everything will be alright</h1>
+        </div>
+
+        <div class="envelope-wrapper" onclick="bloom()">
+            <div class="envelope">
+                <div class="flap"></div>
+                <div class="pocket"></div>
+                
+                <div class="flower-cluster" id="cluster"></div>
+            </div>
+            <div class="instruction">Click to Open</div>
+        </div>
+
     </div>
-    <div class="message">Everything will be alright 🌸</div>
-  </div>
+
+    <script>
+        function bloom() {
+            const container = document.getElementById('mainContainer');
+            const body = document.body;
+            const cluster = document.getElementById('cluster');
+
+            // Prevent double clicking
+            if(container.classList.contains('active')) return;
+
+            // 1. Activate animations
+            container.classList.add('active');
+            body.classList.add('grown');
+            document.querySelector('.instruction').style.display = 'none';
+
+            // 2. Generate Random Flowers
+            const colors = ['#ff4081', '#e040fb', '#7c4dff', '#536dfe', '#ffeb3b', '#ff9800'];
+            
+            // Create 40 flowers
+            for (let i = 0; i < 40; i++) {
+                const flower = document.createElement('div');
+                flower.classList.add('gen-flower');
+                
+                // Random Size
+                const scale = 0.5 + Math.random(); // 0.5 to 1.5
+                
+                // Random Position (Spread out)
+                // We want them to pop out upwards and outwards
+                const left = (Math.random() * 300) - 150; // -150px to +150px
+                const bottom = (Math.random() * 250) + 50; // 50px to 300px up
+                const delay = Math.random() * 1.5; // Random delay
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+                // Apply styles
+                flower.style.setProperty('--color', randomColor);
+                flower.style.transitionDelay = `${delay}s`;
+                
+                // We set the FINAL state immediately via JS timeout so CSS transition catches it
+                // Append first
+                cluster.appendChild(flower);
+
+                // Force a reflow so the browser knows the starting position (0,0)
+                window.getComputedStyle(flower).transform;
+
+                // Set final position after a tiny delay to allow the 'scale(0)' to exist first
+                setTimeout(() => {
+                    flower.style.left = `${left}px`;
+                    flower.style.bottom = `${bottom}px`;
+                    flower.style.transform = `scale(${scale})`;
+                }, 50); // slight delay to ensure transition triggers
+            }
+        }
+    </script>
 </body>
 </html>
